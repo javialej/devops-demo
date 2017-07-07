@@ -1,0 +1,11 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - docker build -t plazi
+
+test:
+  override:
+    - docker run plazi npm test
