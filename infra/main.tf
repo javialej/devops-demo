@@ -1,5 +1,5 @@
 resource "digitalocean_loadbalancer" "platzi-demo" {
-  name = "platzi-html-vs"
+  name = "platzi-html-v2"
   region = "nyc3"
 
   forwarding_rule {
@@ -11,8 +11,9 @@ resource "digitalocean_loadbalancer" "platzi-demo" {
   }
 
   healthcheck {
-    port = 3000
-    protocol = "http"
+    port      = 3000
+    protocol  = "http"
+    path      = "/"
   }
 
   droplet_tag = "${digitalocean_tag.platzi-demo.name}"
@@ -23,13 +24,21 @@ resource "digitalocean_tag" "platzi-demo" {
 }
 
 resource "digitalocean_droplet" "platzi-demo" {
-  count    = 3
-  image    = "<IdImagenDocker>"
+  count    = 2
+  image    = "${var.image_id}"
   name     = "platzi-demo"
   region   = "nyc3"
   size     = "512mb"
   ssh_keys = [<IdSSHkey>]
   tags = ["${digitalocean_tag.platzi-demo.id}"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  provisioner "local-exec" {
+    command = "sleep 160 && curl ${self.ipv4_address}:3000"
+  }
 
   user_data = <<EOF
 #cloud-config
